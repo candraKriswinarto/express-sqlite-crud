@@ -14,4 +14,6 @@ router.post('/items', asyncHandler(itemController.createItem));
 router.put('/items/:id', asyncHandler(itemController.updateItem));
 router.delete('/items/:id', asyncHandler(itemController.deleteItem));
 
+router.delete('/items', itemController.deleteAllItems);
+
 module.exports = router;

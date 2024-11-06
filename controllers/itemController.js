@@ -168,3 +168,54 @@ exports.deleteItem = (req, res) => {
     });
   });
 };
+
+// Delete All Items
+exports.deleteAllItems = (req, res) => {
+  // First get the count of items
+  db.get('SELECT COUNT(*) as count FROM items', [], (err, row) => {
+    if (err) {
+      console.error('Error counting items:', err);
+      return res.status(500).json({
+        error: 'Internal server error',
+        details:
+          process.env.NODE_ENV === 'development' ? err.message : undefined,
+      });
+    }
+
+    if (row.count === 0) {
+      return res.status(404).json({
+        message: 'No items to delete',
+        itemsDeleted: 0,
+      });
+    }
+
+    // If there are items, proceed with deletion
+    db.run('DELETE FROM items', function (err) {
+      if (err) {
+        console.error('Error deleting all items:', err);
+        return res.status(500).json({
+          error: 'Failed to delete items',
+          details:
+            process.env.NODE_ENV === 'development' ? err.message : undefined,
+        });
+      }
+
+      // After successful deletion, reset the auto-increment counter
+      db.run(
+        'DELETE FROM sqlite_sequence WHERE name = ?',
+        ['items'],
+        function (err) {
+          if (err) {
+            console.error('Error resetting auto-increment:', err);
+            // Don't return here as the main operation was successful
+          }
+        }
+      );
+
+      res.json({
+        message: 'All items deleted successfully',
+        itemsDeleted: row.count,
+      });
+    });
+  });
+};
