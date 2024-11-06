@@ -1,5 +1,2 @@
 # Node.js dependencies
 node_modules/
-
-# SQLite database files
-data/database.sqlite
